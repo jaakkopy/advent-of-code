@@ -1,5 +1,5 @@
 in.txt
-test.txt
+test*.txt
 solution.o
 solution
 solution.hi
