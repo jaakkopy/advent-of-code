@@ -22,9 +22,6 @@ findDigits xs
         (isMatch, l, d) = checkDigit xs 0
         (c:cs) = xs
 
-firstLastDigit :: String -> Int
-firstLastDigit = (\x -> read ([head x] ++ [last x]) :: Int) . (filter isDigit)
-
 main = do
     contents <- getContents
     let ls = lines contents
