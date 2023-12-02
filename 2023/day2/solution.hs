@@ -42,8 +42,19 @@ countPossible xs i
     where 
         verify round = all (==True) $ zipWith (<=) round limits
 
+sumMaximums :: [[[Int]]] -> Int
+sumMaximums xs
+    | null xs = 0
+    | otherwise = (maxR * maxG * maxB) + sumMaximums (tail xs)
+    where
+        h = head xs
+        maxR = maximum [(x !! 0) | x <- h]
+        maxG = maximum [(x !! 1) | x <- h]
+        maxB = maximum [(x !! 2) | x <- h]
+
 main = do
     contents <- getContents
     let ls = lines contents
         games = readGames ls
-    print $ countPossible games 1
+    print $ countPossible games 1 -- part 1
+    print $ sumMaximums games     -- part 2
