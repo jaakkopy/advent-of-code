@@ -42,10 +42,10 @@ countPossible xs i
     where 
         verify round = all (==True) $ zipWith (<=) round limits
 
-sumMaximums :: [[[Int]]] -> Int
-sumMaximums xs
+cubePowerSum :: [[[Int]]] -> Int
+cubePowerSum xs
     | null xs = 0
-    | otherwise = (maxR * maxG * maxB) + sumMaximums (tail xs)
+    | otherwise = (maxR * maxG * maxB) + cubePowerSum (tail xs)
     where
         h = head xs
         maxR = maximum [(x !! 0) | x <- h]
@@ -57,4 +57,4 @@ main = do
     let ls = lines contents
         games = readGames ls
     print $ countPossible games 1 -- part 1
-    print $ sumMaximums games     -- part 2
+    print $ cubePowerSum games     -- part 2
