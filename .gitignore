@@ -3,3 +3,4 @@ test*.txt
 solution.o
 solution
 solution.hi
+solution.exe
