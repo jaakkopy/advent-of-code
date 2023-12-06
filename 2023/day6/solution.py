@@ -6,7 +6,8 @@ def dist_traveled(T, t):
     return t*(T-t)
 
 '''
-let T equal the time limit of the game and d the distance limit. The distance traveled is t(T-t) = -t^2 + tT. Solve for t:
+let T equal the time limit of the game and d the distance limit. The distance traveled is t(T-t) = -t^2 + tT where t is the time spent pressing the button.
+Solve for t:
 Tt - t^2 > d
 t^2 - Tt + d < 0
 
