@@ -16,7 +16,7 @@ public class Node {
     }
 }
 
-// Use binary trees for fast lookup of ranges
+// Use binary trees for faster lookup of ranges
 public class BinTree {
     private Node root = null;
 
@@ -56,7 +56,6 @@ public class BinTree {
         }
         return value;
     }
-
 }
 
 public class Solution
@@ -65,13 +64,11 @@ public class Solution
         List<string> lines = new List<string>();
         string line;
         while ((line = Console.ReadLine()) != null)
-        {
             lines.Add(line);
-        }
         return lines;
     }
 
-    // Each map (seed->soil etc) has its own binary tree in a list
+    // Read each map in reversed order (e.g seed->soil becomes soil->seed)
     public static List<BinTree> ReadMapsToBinTrees(List<string> lines) {
         List<BinTree> trees = new List<BinTree>();
         int i = 2;
@@ -81,7 +78,7 @@ public class Solution
             int j = i + 1;
             while (j < lc && lines.ElementAt(j).Length > 0) {
                 List<long> destSrcRange = lines.ElementAt(j).Split().ToList().ConvertAll(long.Parse);
-                t.AddNode(destSrcRange[0], destSrcRange[1], destSrcRange[2]);
+                t.AddNode(destSrcRange[1], destSrcRange[0], destSrcRange[2]);
                 ++j;
             }
             trees.Add(t);
@@ -92,18 +89,32 @@ public class Solution
         return trees;
     }
 
-    public static long FindMinimumLocation(List<long> intialSeeds, List<BinTree> trees) {
-        long min = -1;
-        foreach (var s in intialSeeds) {
-            long key = s;
-            for (int mapTree = 0; mapTree < trees.Count; ++mapTree) {
+    // Check if the seed exists. If exact is true, only exact matches count. If exact is false, check ranges of seeds
+    public static bool seedExists(List<long> initalSeeds, long seed, bool exact) {
+        for (int i = 0; i < initalSeeds.Count - 1; i += 2) {
+            if (exact) {
+                if (initalSeeds[i] == seed || initalSeeds[i+1] == seed)
+                    return true;
+            }
+            else if (seed >= initalSeeds[i] && seed <= initalSeeds[i] + initalSeeds[i+1] - 1)
+                return true;
+        }
+        return false;
+    }
+
+    // Begin from location 0 and advance upward until a seed matching the location is found
+    // (kind of slow)
+    public static long FindMinimumLocation(List<BinTree> trees, List<long> initalSeeds, bool exact) {
+        long location = 0;
+        while (true) {
+            long key = location;
+            for (int mapTree = trees.Count - 1; mapTree >= 0; --mapTree) {
                 key = trees.ElementAt(mapTree).FindRangeValue(key);
             }
-            if (min == -1 || key < min) {
-                min = key;
-            }
+            if (seedExists(initalSeeds, key, exact))
+                return location;
+            ++location;
         }
-        return min;
     }
 
     public static void Main()
@@ -111,7 +122,7 @@ public class Solution
         List<string> lines = ReadLines();
         List<long> initalSeeds = lines.ElementAt(0).Substring(7).Split().ToList().ConvertAll(long.Parse);
         var trees = ReadMapsToBinTrees(lines); 
-        long minLocation = FindMinimumLocation(initalSeeds, trees);
-        Console.WriteLine(minLocation);
+        Console.WriteLine(FindMinimumLocation(trees, initalSeeds, true));  // Part 1
+        Console.WriteLine(FindMinimumLocation(trees, initalSeeds, false)); // Part 2
     }
 }
