@@ -1,43 +1,38 @@
 import qualified Data.Map as M
-import Data.Char (isSpace)
-import Data.List (sort)
+import Data.List
+import Data.Ord
 
-syms = M.fromList $ zip ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'] (reverse [1..13])
+compareCards :: Char -> Char -> M.Map Char Int -> Ordering
+compareCards c1 c2 orderMap = compare (orderMap M.! c1) (orderMap M.! c2)
 
-handKinds = M.fromList $ zip [[5,5,5,5,5], [1,4,4,4,4], [2,2,3,3,3], [1,1,3,3,3], [1,2,2,2,2], [1,1,1,2,2], [1,1,1,1,1]] (reverse [1..7])
+countSameCards :: String -> [Int]
+countSameCards h = reverse $ sort $ map length $ group $ sort h
 
-handKind :: String -> Int
-handKind xs = handKinds M.! amounts
-    where amounts = sort [length $ filter (==x) xs | x <- xs]
+replaceJs :: String -> String
+replaceJs hand = map (\c -> if c == 'J' then most else c) hand
+    where
+        removedJs = filter (/='J') hand
+        most = if (not . null) removedJs then (head . maximumBy (comparing length) . group . sort $ filter (/='J') hand) else 'J'
 
-compareHands :: String -> String -> Ordering
-compareHands xs ys = compare (handKind xs) (handKind ys) <> compareSyms xs ys
-  where
-    compareSyms as bs
-        | null as && null bs = EQ
-        | sa > sb = GT
-        | sa < sb = LT
-        | otherwise = compareSyms (tail as) (tail bs)
-        where
-            sa = syms M.! head as
-            sb = syms M.! head bs
+compareRanks :: String -> String -> Bool -> Ordering
+compareRanks hand1 hand2 shouldReplaceJs = compare (countSameCards h1) (countSameCards h2)
+    where h1 = if shouldReplaceJs then replaceJs hand1 else hand1
+          h2 = if shouldReplaceJs then replaceJs hand2 else hand2
 
-
-data Hand = Hand {
-    cards :: String,
-    bid :: Int
-} deriving (Show)
-
-instance Eq Hand where
-    a == b = (cards a) == (cards b)
-
-instance Ord Hand where
-    compare a b = compareHands (cards a) (cards b)
-
+compareHands :: String -> String -> M.Map Char Int -> Bool -> Ordering
+compareHands hand1 hand2 cardMap shouldReplaceJs = if rankComparison == EQ then compareHands' hand1 hand2 else rankComparison
+    where
+        rankComparison = compareRanks hand1 hand2 shouldReplaceJs
+        compareHands' (c1:h1) (c2:h2)
+            | null (c1:h1) && null (c2:h2) = EQ
+            | c1 == c2 = compareHands' h1 h2
+            | otherwise = compareCards c1 c2 cardMap
 
 main = do
     contents <- getContents
     let ls = lines contents
-        hands = sort $ map (\x -> Hand (takeWhile (not . isSpace) x) (read (dropWhile (not . isSpace) x) :: Int)) ls
-
-    print $ foldl (\a (r, b) -> a + r*b) 0 $ zip [1..] (map bid hands)
+        handsAndBids = map ((\[x,y] -> (x, read y :: Int)) . words) ls
+        part1Map = M.fromList $ zip ['A', 'K', 'Q', 'J', 'T', '9', '8', '7', '6', '5', '4', '3', '2'] (reverse [1..13])
+        part2Map = M.fromList $ zip ['A', 'K', 'Q', 'T', '9', '8', '7', '6', '5', '4', '3', '2', 'J'] (reverse [1..13])
+    print $ sum $ map (\(a,b) -> a * b) $ zip [1..] $ map snd $ sortBy (\(a,b) (c, d) -> compareHands a c part1Map False) handsAndBids
+    print $ sum $ map (\(a,b) -> a * b) $ zip [1..] $ map snd $ sortBy (\(a,b) (c, d) -> compareHands a c part2Map True) handsAndBids
