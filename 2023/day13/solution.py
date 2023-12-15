@@ -36,7 +36,6 @@ def check_horizontal_reflection(group):
 
 if __name__ == "__main__":
     from sys import stdin
-    groups = [[list(y) for y in x.split('\n')] for x in stdin.read().split('\n\n')]
+    groups = [[list(y) for y in x.split('\n') if y != ''] for x in stdin.read().split('\n\n')]
     s = sum(map(lambda g: h if (h := check_horizontal_reflection(g)) != 0 else check_vertical_reflection(g), groups))
     print(s) # Part 1
-    s = 0
