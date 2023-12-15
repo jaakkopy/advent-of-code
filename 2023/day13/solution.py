@@ -21,7 +21,6 @@ def compare_cols(rows, mid):
     return True
 
 def check_vertical_reflection(group):
-    rows = len(group)
     cols = len(group[0])
     for mid in range(cols - 1):
         if compare_rows(group, mid):
@@ -30,7 +29,6 @@ def check_vertical_reflection(group):
 
 def check_horizontal_reflection(group):
     rows = len(group)
-    cols = len(group[0])
     for mid in range(rows - 1):
         if compare_cols(group, mid):
             return 100 * (mid + 1)
@@ -38,15 +36,7 @@ def check_horizontal_reflection(group):
 
 if __name__ == "__main__":
     from sys import stdin
-    lines = [x.rstrip() for x in stdin.readlines()]
-    groups = []
-    g = []
-    for l in lines:
-        if l == '':
-            groups.append(g)
-            g = []
-        else:
-            g.append(l)
-    groups.append(g)
-    s = sum(map(lambda x: check_horizontal_reflection(x) + check_vertical_reflection(x), groups))
-    print(s)
+    groups = [[list(y) for y in x.split('\n')] for x in stdin.read().split('\n\n')]
+    s = sum(map(lambda g: h if (h := check_horizontal_reflection(g)) != 0 else check_vertical_reflection(g), groups))
+    print(s) # Part 1
+    s = 0
