@@ -1,40 +1,40 @@
-def p1(line):
-    (syms, nums) = line.split()
-    nums = [int(x) for x in nums.split(',')]
-    ls = len(syms)
-    quests = [i for i in range(ls) if syms[i] == '?']
+from functools import cache
 
-    # Mark each # with a 1 bit
-    starter_bs = 0
-    for i in range(ls):
-        if syms[i] == '#':
-            starter_bs |= (1 << i)
+lines = []
 
-    def verify(x):
-        k = x
-        for n in nums:
-            while x != 0 and (x & 1) == 0:
-                x >>= 1
-            count = 0
-            while (x & 1) == 1:
-                x >>= 1
-                count += 1
-            if count != n:
-                return False
-        # the 1 bits should match exactly to the numbers
-        if x != 0:
-            return False
-        return True
+@cache
+def ways(i, j, k, l):
+    li = lines[l]    
+    if i == len(li[0]):
+        if j == len(li[1]) and k == 0:
+            return 1
+        if j == len(li[1]) - 1 and k == li[1][j]:
+            return 1
+        return 0
+    dot = 0
+    tag = 0
+    if li[0][i] == '.' or li[0][i] == '?':
+        # either all the sequences of '#'s have been handled or the next has not yet started
+        if k == 0:
+            dot = ways(i+1, j, 0, l)
+        # this sequence of '#'s is done, move to the next one
+        elif j < len(li[1]) and li[1][j] == k:
+            dot = ways(i+1, j+1, 0, l)
+    # place a '#' here and increment k by 1
+    if li[0][i] == '#' or li[0][i] == '?':
+        tag = ways(i+1, j, k+1, l)
+    return dot + tag
 
-    def ways(k, i):
-        if i == len(quests):
-            return int(verify(k))
-        return ways(k | (1 << quests[i]), i + 1) + ways(k, i + 1)
-
-    return ways(starter_bs, 0)
-    
 
 if __name__ == "__main__":
     from sys import stdin
-    lines = [x.rstrip() for x in stdin.readlines()]
-    print(sum(map(p1, lines)))
+    lines = [[y[0], [int(z) for z in y[1].split(",")]] for y in [x.rstrip().split() for x in stdin.readlines()]]
+    print(sum(ways(0,0,0,i) for i in range(len(lines)))) # part 1
+
+    multiplied = []
+    for [syms, nums] in lines:
+        multiplied.append((('?'.join(syms for _ in range(5))), nums * 5))
+
+    lines = multiplied
+    ways.cache_clear()
+    print(sum(ways(0,0,0,i) for i in range(len(lines)))) # part 2
