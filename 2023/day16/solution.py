@@ -54,11 +54,11 @@ def mirror2(pos_and_dir, p, d):
         right(pos_and_dir, p, d)
 
 
-def follow_light_paths(lines: list[str]):
+def follow_light_paths(lines: list[str], startpos, startdir):
     rows = len(lines)
     cols = len(lines[0])
     visited = set()
-    pos_and_dir = [((0, 0), (0, 1))]
+    pos_and_dir = [(startpos, startdir)]
     while len(pos_and_dir) > 0:
         pd = pos_and_dir.pop()
         (p, d) = pd
@@ -85,6 +85,30 @@ if __name__ == "__main__":
     from sys import stdin
     lines = [list(x.rstrip()) for x in stdin.readlines()]
     markers = [x.copy() for x in lines]
-    visited = follow_light_paths(lines)
+    visited = follow_light_paths(lines, (0, 0), (0, 1))
     unique_positions = len(set([x[0] for x in visited]))
-    print(unique_positions)
+    print(unique_positions)  # part 1
+    highest_energy = 0
+    for c in range(len(lines[0])):
+        highest_energy = max(
+            highest_energy, len(
+                set([x[0] for x in follow_light_paths(
+                    lines, (0, c), (1, 0))]))
+        )
+        highest_energy = max(
+            highest_energy, len(
+                set([x[0] for x in follow_light_paths(
+                    lines, (len(lines) - 1, c), (-1, 0))]))
+        )
+    for r in range(len(lines)):
+        highest_energy = max(
+            highest_energy, len(
+                set([x[0] for x in follow_light_paths(
+                    lines, (r, 0), (0, 1))]))
+        )
+        highest_energy = max(
+            highest_energy, len(
+                set([x[0] for x in follow_light_paths(
+                    lines, (r, len(lines[0]) - 1), (0, -1))]))
+        )
+    print(highest_energy)  # part 2
