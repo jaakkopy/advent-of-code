@@ -25,6 +25,9 @@ def gen_points2(guide):
     return points
 
 
+# Same technique as in day 10
+# https://en.wikipedia.org/wiki/Shoelace_formula
+# https://en.wikipedia.org/wiki/Pick%27s_theorem
 def calculate_area(points):
     s = 0
     b = 0
