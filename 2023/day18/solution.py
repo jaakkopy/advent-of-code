@@ -11,6 +11,20 @@ def gen_points(guide):
     return points
 
 
+def gen_points2(guide):
+    points = [(0, 0)]
+    for g in guide:
+        p = points[-1]
+        d = int(g[2][2:-2], 16)
+        direction = g[2][-2]
+        match direction:
+            case '0': points.append((p[0], p[1] + d))
+            case '1': points.append((p[0] + d, p[1]))
+            case '2': points.append((p[0], p[1] - d))
+            case '3': points.append((p[0] - d, p[1]))
+    return points
+
+
 def calculate_area(points):
     s = 0
     b = 0
@@ -24,5 +38,5 @@ def calculate_area(points):
 if __name__ == "__main__":
     from sys import stdin
     guide = [x.rstrip().split() for x in stdin.readlines()]
-    points = gen_points(guide)
-    print(calculate_area(points))
+    print(calculate_area(gen_points(guide)))   # part 1
+    print(calculate_area(gen_points2(guide)))  # part 2
